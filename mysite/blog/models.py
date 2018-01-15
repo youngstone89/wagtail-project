@@ -2,14 +2,18 @@ from django.db import models
 
 # Create your models here.
 
-
+from modelcluster.contrib.taggit import ClusterTaggableManager
+from taggit.models import TaggedItemBase
 from wagtail.wagtailcore.models import Page, Orderable
 from wagtail.wagtailcore.fields import RichTextField
-from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel
+from wagtail.wagtailadmin.edit_handlers import FieldPanel, InlinePanel, MultiFieldPanel
 from wagtail.wagtailimages.edit_handlers import ImageChooserPanel
 from wagtail.wagtailsearch import index
 from modelcluster.fields import ParentalKey
 
+
+class BlogPageTag(TaggedItemBase):
+	content_object = ParentalKey('BlogPage', related_name='tagged_items')
 
 class BlogIndexPage(Page):
 	intro = RichTextField(blank=True)
@@ -31,7 +35,7 @@ class BlogPage(Page):
 	date = models.DateField("Post date")
 	intro = models.CharField(max_length=250)
 	body = RichTextField(blank=True)
-
+	tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
 
 	def main_image(self):
 		gallery_item = self.gallery_images.first()
@@ -46,7 +50,11 @@ class BlogPage(Page):
 	]
 
 	content_panels = Page.content_panels + [
-	FieldPanel('date'),
+
+		MultiFieldPanel([
+			FieldPanel('date'),
+			FieldPanel('tags')], heading='Blog Information'),
+	
 	FieldPanel('intro'),
 	FieldPanel('body', classname="full"),
 	InlinePanel('gallery_images', label="Gallery Images")
