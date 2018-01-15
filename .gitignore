@@ -1,0 +1,4 @@
+mystie/media/*
+*.pyc
+mysite/db.sqlite3
+mysite/blog/migrations/*
